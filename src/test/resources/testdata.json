@@ -1,0 +1,22 @@
+{
+  "loginTests": [
+    {
+      "url": "https://app-medica.vercel.app",
+      "correo": "vi.fariasr@duocuc.cl",
+      "contraseña": "vichofariasJalvarez2001",
+      "mensajeExito": "Login Successful"
+    },
+    {
+      "url": "https://app-medica.vercel.app",
+      "correo": "vicentefariasr1@gmail.com",
+      "contraseña": "123",
+      "mensajeExito": "Login Successful"
+    },
+    {
+      "url": "https://app-medica.vercel.app",
+      "correo": "v.fariasrivara@gmail.com",
+      "contraseña": "1234",
+      "mensajeExito": "Login Successful"
+    }
+  ]
+}
