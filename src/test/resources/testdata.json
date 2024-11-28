@@ -1,10 +1,16 @@
 {
-  "loginTests": [
-    {
+  "loginTests": {
+    "LoginExitoso": {
       "url": "https://app-medica.vercel.app",
       "correo": "a@abc.cl",
       "contraseña": "123",
       "mensajeExito": "Login Successful"
+    },
+    "LoginFallido": {
+      "url": "https://app-medica.vercel.app",
+      "correo": "invalid@example.com",
+      "contraseña": "wrongpassword",
+      "mensajeError": "Invalid credentials"
     }
-    ]
+  }
 }

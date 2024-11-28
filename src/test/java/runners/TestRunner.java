@@ -7,7 +7,7 @@ import org.junit.runner.RunWith;
 @RunWith(Cucumber.class)
 @CucumberOptions(
         features = "src/test/resources/features", // Ruta a las características (puede incluir todos los .feature)
-        glue = {"steps"}, // Ruta a las clases de pasos
+        glue = {"Steps"}, // Ruta a las clases de pasos
         plugin = {"pretty", "json:target/cucumber-report/cucumber.json"}, // Reporte en formato JSON
         tags = "@LoginExitoso" // Sin filtro de etiquetas para ejecutar todo
 )
