@@ -14,10 +14,10 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.io.File;
 import java.io.IOException;
 
-public class LoginSuccesfull {
+public class LoginFail {
     private WebDriver driver;
     private WebDriverWait wait;
-    private JsonNode loginExitosoData; // Solo una variable para almacenar los datos de LOGINEXITOSO
+    private JsonNode loginFallidoData; // Variable para los datos de LoginFallido
 
     @Before
     public void setUp() {
@@ -34,7 +34,7 @@ public class LoginSuccesfull {
         }
     }
 
-    // Cargar solo los datos de "LOGINEXITOSO"
+    // Cargar solo los datos de "LoginFallido"
     private void loadTestData() {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -46,60 +46,56 @@ public class LoginSuccesfull {
 
             JsonNode rootNode = objectMapper.readTree(file);
 
-            // Filtrar solo el conjunto de datos de "LoginExitoso"
+            // Filtrar solo el conjunto de datos de "LoginFallido"
             JsonNode loginTestsNode = rootNode.path("loginTests");
-            loginExitosoData = loginTestsNode.path("LoginExitoso"); // Seleccionamos solo los datos de "LoginExitoso"
+            loginFallidoData = loginTestsNode.path("LoginFallido");
 
-            if (loginExitosoData.isMissingNode()) {
-                throw new RuntimeException("No se encontraron datos válidos para LoginExitoso en el archivo JSON.");
+            if (loginFallidoData.isMissingNode()) {
+                throw new RuntimeException("No se encontraron datos válidos para LoginFallido en el archivo JSON.");
             }
         } catch (IOException e) {
             throw new RuntimeException("Error al leer el archivo JSON: " + e.getMessage(), e);
         }
     }
 
-    @Given("que puedo acceder a la URL valida")
-    public void que_puedo_acceder_a_la_url_valida() throws InterruptedException {
-        String url = loginExitosoData.get("url").asText();
-        driver.get(url); // Usamos solo la URL del login exitoso
-        Thread.sleep(1500); // Esperamos 3 segundos antes de proceder
+    @Given("que puedo acceder a la URL valida con el identificador {string}")
+    public void que_puedo_acceder_a_la_url_valida_con_el_identificador(String identificador) {
+        if (!identificador.equals("LoginFallido")) {
+            throw new RuntimeException("Identificador no coincide con LoginFallido");
+        }
+        String url = loginFallidoData.get("url").asText();
+        driver.get(url);
     }
 
     @When("hacemos clic en el botón de login valido")
-    public void hacemos_clic_en_el_botón_de_login_valido() throws InterruptedException {
+    public void hacemos_clic_en_el_botón_de_login_valido() {
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath("/html/body/div[2]/header/div/div[2]/nav/a"))).click();
-        Thread.sleep(1500); // Esperamos 2 segundos después de hacer clic
     }
 
     @When("ingresa el Correo en el campo de Correo valido")
-    public void ingresa_el_correo_en_el_campo_de_correo_valido() throws InterruptedException {
-        String correo = loginExitosoData.get("correo").asText(); // Solo obtenemos el correo del login exitoso
+    public void ingresa_el_correo_en_el_campo_de_correo_valido() {
+        String correo = loginFallidoData.get("correo").asText();
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("email"))).clear();
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("email"))).sendKeys(correo);
-        Thread.sleep(1500); // Esperamos 2 segundos después de ingresar el correo
     }
 
     @When("ingresa la contraseña en el campo de Contraseña valida")
-    public void ingresa_la_contraseña_en_el_campo_de_contraseña_valida() throws InterruptedException {
-        String contraseña = loginExitosoData.get("contraseña").asText(); // Solo obtenemos la contraseña del login exitoso
+    public void ingresa_la_contraseña_en_el_campo_de_contraseña_valida() {
+        String contraseña = loginFallidoData.get("contraseña").asText();
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("password"))).clear();
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("password"))).sendKeys(contraseña);
-        Thread.sleep(2000); // Esperamos 2 segundos después de ingresar la contraseña
     }
 
     @When("hacemos clic en el botón de iniciar sesión valido")
-    public void hacemos_clic_en_el_botón_de_iniciar_sesión_valido() throws InterruptedException {
+    public void hacemos_clic_en_el_botón_de_iniciar_sesión_valido() {
         wait.until(ExpectedConditions.elementToBeClickable(By.id("loginSubmitButton"))).click();
-        Thread.sleep(1500); // Esperamos 3 segundos después de hacer clic
     }
 
-    // Corregimos esta parte para que reciba el mensaje esperado como parámetro
-    @Then("debería ver un mensaje de éxito indicando {string}")
-    public void debería_ver_un_mensaje_de_éxito_indicando(String mensajeExitoEsperado) {
+    @Then("debería ver un mensaje indicando {string}")
+    public void debería_ver_un_mensaje_indicando(String mensajeClave) {
         String mensajeObtenido = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/div[1]/div/div/div[2]"))).getText();
+        String mensajeEsperado = loginFallidoData.get(mensajeClave).asText();
 
-        // Comprobamos si el mensaje obtenido coincide con el esperado
-        assert mensajeObtenido.trim().equals(mensajeExitoEsperado) : "El mensaje no coincide con lo esperado. Mensaje esperado: " + mensajeExitoEsperado + ", pero obtuvimos: " + mensajeObtenido;
-
+        assert mensajeObtenido.trim().equals(mensajeEsperado) : "El mensaje no coincide. Esperado: " + mensajeEsperado + ", pero obtuvimos: " + mensajeObtenido;
     }
 }

@@ -7,4 +7,4 @@ Feature: Pruebas de inicio de sesión exitoso
     And ingresa el Correo en el campo de Correo valido
     And ingresa la contraseña en el campo de Contraseña valida
     And hacemos clic en el botón de iniciar sesión valido
-    Then debería ver un mensaje de éxito indicando "Login Succesfull"
+    Then debería ver un mensaje de éxito indicando "Login Successful"
