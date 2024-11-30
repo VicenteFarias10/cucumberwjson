@@ -12,5 +12,15 @@
       "contraseña": "wrongpassword",
       "mensajeError": "Invalid credentials"
     }
+  },
+  "registerTests": {
+    "RegistroValido": {
+      "url": "https://app-medica.vercel.app/register",
+      "nombre": "Vicente Farias Rivera",
+      "correo": "vicente@gmail.com",
+      "celular": "987654321",
+      "contraseña": "123",
+      "mensajeExito": "Usuario creado correctamente"
+    }
   }
 }

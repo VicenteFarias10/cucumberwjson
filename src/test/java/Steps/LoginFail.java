@@ -1,5 +1,6 @@
 package Steps;
 
+import Utils.DriverManager;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.After;
@@ -7,9 +8,9 @@ import io.cucumber.java.Before;
 import io.cucumber.java.en.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -17,24 +18,24 @@ import java.io.IOException;
 public class LoginFail {
     private WebDriver driver;
     private WebDriverWait wait;
-    private JsonNode loginFallidoData; // Variable para los datos de LoginFallido
+    private JsonNode loginFallidoData;
 
     @Before
     public void setUp() {
-        System.setProperty("webdriver.chrome.driver", "src/test/resources/driver/chromedriver.exe");
-        driver = new ChromeDriver();
+        DriverManager.initializeDriver(); // Inicializa el WebDriver usando el DriverManager
+        driver = DriverManager.getDriver();
         wait = new WebDriverWait(driver, 10);
-        loadTestData();
+        loadTestData(); // Carga los datos necesarios
     }
 
     @After
     public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
+        DriverManager.quitDriver(); // Cierra y limpia la instancia del WebDriver
     }
 
-    // Cargar solo los datos de "LoginFallido"
+    /**
+     * Cargar los datos de prueba desde el archivo JSON.
+     */
     private void loadTestData() {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -45,8 +46,6 @@ public class LoginFail {
             }
 
             JsonNode rootNode = objectMapper.readTree(file);
-
-            // Filtrar solo el conjunto de datos de "LoginFallido"
             JsonNode loginTestsNode = rootNode.path("loginTests");
             loginFallidoData = loginTestsNode.path("LoginFallido");
 
@@ -58,44 +57,51 @@ public class LoginFail {
         }
     }
 
-    @Given("que puedo acceder a la URL valida con el identificador {string}")
-    public void que_puedo_acceder_a_la_url_valida_con_el_identificador(String identificador) {
-        if (!identificador.equals("LoginFallido")) {
-            throw new RuntimeException("Identificador no coincide con LoginFallido");
-        }
+    @Given("que puedo acceder a la URL valida de inicio de sesion invalidas")
+    public void que_puedo_acceder_a_la_url_valida_de_inicio_de_sesion_invalidas() {
         String url = loginFallidoData.get("url").asText();
         driver.get(url);
     }
 
-    @When("hacemos clic en el botón de login valido")
-    public void hacemos_clic_en_el_botón_de_login_valido() {
+    @When("hacemos clic en el botón de login invalido")
+    public void hacemos_clic_en_el_botón_de_login_invalido() {
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath("/html/body/div[2]/header/div/div[2]/nav/a"))).click();
     }
 
-    @When("ingresa el Correo en el campo de Correo valido")
-    public void ingresa_el_correo_en_el_campo_de_correo_valido() {
+    @When("ingresa el Correo en el campo de Correo invalido")
+    public void ingresa_el_correo_en_el_campo_de_correo_invalido() {
         String correo = loginFallidoData.get("correo").asText();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("email"))).clear();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("email"))).sendKeys(correo);
+        By emailField = By.id("email");
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(emailField)).clear();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(emailField)).sendKeys(correo);
     }
 
-    @When("ingresa la contraseña en el campo de Contraseña valida")
-    public void ingresa_la_contraseña_en_el_campo_de_contraseña_valida() {
+    @When("ingresa la contraseña en el campo de Contraseña invalido")
+    public void ingresa_la_contraseña_en_el_campo_de_contraseña_invalido() {
         String contraseña = loginFallidoData.get("contraseña").asText();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("password"))).clear();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("password"))).sendKeys(contraseña);
+        By passwordField = By.id("password");
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(passwordField)).clear();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(passwordField)).sendKeys(contraseña);
     }
 
-    @When("hacemos clic en el botón de iniciar sesión valido")
-    public void hacemos_clic_en_el_botón_de_iniciar_sesión_valido() {
+    @When("hacemos clic en el botón de iniciar sesión invalido")
+    public void hacemos_clic_en_el_botón_de_iniciar_sesión_invalido() {
         wait.until(ExpectedConditions.elementToBeClickable(By.id("loginSubmitButton"))).click();
     }
 
-    @Then("debería ver un mensaje indicando {string}")
-    public void debería_ver_un_mensaje_indicando(String mensajeClave) {
-        String mensajeObtenido = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/div[1]/div/div/div[2]"))).getText();
-        String mensajeEsperado = loginFallidoData.get(mensajeClave).asText();
+    @Then("debería ver un mensaje de error indicando {string}")
+    public void debería_ver_un_mensaje_de_error_indicando(String mensajeErrorEsperado) {
+        String mensajeObtenido = wait
+                .until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/div[1]/div/div/div[2]")))
+                .getText();
 
-        assert mensajeObtenido.trim().equals(mensajeEsperado) : "El mensaje no coincide. Esperado: " + mensajeEsperado + ", pero obtuvimos: " + mensajeObtenido;
+        // Verifica si el mensaje obtenido coincide con el mensaje en el archivo JSON
+        String mensajeEsperadoDelJson = loginFallidoData.get("mensajeError").asText();
+
+        assert mensajeObtenido.trim().equals(mensajeEsperadoDelJson) :
+                String.format("El mensaje no coincide con lo esperado. Esperado: '%s', pero obtenido: '%s'",
+                        mensajeEsperadoDelJson, mensajeObtenido);
     }
 }
