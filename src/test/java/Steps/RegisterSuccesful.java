@@ -1,6 +1,7 @@
 package Steps;
 
 import Utils.DriverManager;
+import Utils.Utility;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.After;
@@ -8,7 +9,6 @@ import io.cucumber.java.Before;
 import io.cucumber.java.en.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -22,20 +22,18 @@ public class RegisterSuccesful {
 
     @Before
     public void setUp() {
-        DriverManager.initializeDriver(); // Inicializa el WebDriver usando DriverManager
+        DriverManager.initializeDriver();
         driver = DriverManager.getDriver();
         wait = new WebDriverWait(driver, 10);
-        loadTestData(); // Carga los datos del JSON
+        loadTestData();
     }
 
     @After
     public void tearDown() {
-        DriverManager.quitDriver(); // Cierra y limpia la instancia del WebDriver
+        System.out.println("Cerrando el driver...");
+        DriverManager.quitDriver();
     }
 
-    /**
-     * Cargar los datos de prueba desde el archivo JSON.
-     */
     private void loadTestData() {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -58,64 +56,57 @@ public class RegisterSuccesful {
     }
 
     @Given("que puedo acceder a la URL de registro válida")
-    public void que_puedo_acceder_a_la_url_de_registro_válida() {
-        String url = registerData.get("url").asText();
-        driver.get(url);
+    public void que_puedo_acceder_a_la_url_de_registro_válida() throws IOException {
+        driver.get(registerData.get("url").asText());
+        Utility.captureScreenShot(driver, "evidencias/Acceso_URL_Registro_" + Utility.getTimeStampValue() + ".png");
     }
 
     @When("ingreso el Nombre Completo válido")
-    public void ingreso_el_nombre_completo_válido() {
-        String nombre = registerData.get("nombre").asText();
-        WebElement nombreCompletoField = driver.findElement(By.xpath("//*[@id=\"fullName\"]"));
-        nombreCompletoField.sendKeys(nombre);
+    public void ingreso_el_nombre_completo_válido() throws IOException {
+        driver.findElement(By.xpath("//*[@id=\"fullName\"]"))
+                .sendKeys(registerData.get("nombre").asText());
+        Utility.captureScreenShot(driver, "evidencias/Ingreso_Nombre_Registro_" + Utility.getTimeStampValue() + ".png");
     }
 
     @When("ingreso el Correo Electrónico válido")
-    public void ingreso_el_correo_electrónico_válido() {
-        String correo = registerData.get("correo").asText();
-        WebElement correoField = driver.findElement(By.xpath("//*[@id=\"email\"]"));
-        correoField.sendKeys(correo);
+    public void ingreso_el_correo_electrónico_válido() throws IOException {
+        driver.findElement(By.xpath("//*[@id=\"email\"]"))
+                .sendKeys(registerData.get("correo").asText());
+        Utility.captureScreenShot(driver, "evidencias/Ingreso_Correo_Registro_" + Utility.getTimeStampValue() + ".png");
     }
 
     @When("ingreso el Número de Celular válido")
-    public void ingreso_el_número_de_celular_válido() {
-        String celular = registerData.get("celular").asText();
-        WebElement celularField = driver.findElement(By.xpath("//*[@id=\"phone\"]"));
-        celularField.sendKeys(celular);
+    public void ingreso_el_número_de_celular_válido() throws IOException {
+        driver.findElement(By.xpath("//*[@id=\"phone\"]"))
+                .sendKeys(registerData.get("celular").asText());
+        Utility.captureScreenShot(driver, "evidencias/Ingreso_Celular_Registro_" + Utility.getTimeStampValue() + ".png");
     }
 
     @When("ingreso la Contraseña válida")
-    public void ingreso_la_contraseña_válida() {
-        String contraseña = registerData.get("contraseña").asText();
-        WebElement contraseñaField = driver.findElement(By.xpath("//*[@id=\"password\"]"));
-        contraseñaField.sendKeys(contraseña);
+    public void ingreso_la_contraseña_válida() throws IOException {
+        driver.findElement(By.xpath("//*[@id=\"password\"]"))
+                .sendKeys(registerData.get("contraseña").asText());
+        Utility.captureScreenShot(driver, "evidencias/Ingreso_Contraseña_Registro_" + Utility.getTimeStampValue() + ".png");
     }
 
     @When("hago clic en el botón de registrarme")
-    public void hago_clic_en_el_botón_de_registrarme() {
-        WebElement registrarseButton = driver.findElement(By.xpath("//*[@id=\"registerSubmitButton\"]"));
-        registrarseButton.click();
+    public void hago_clic_en_el_botón_de_registrarme() throws IOException {
+        driver.findElement(By.xpath("//*[@id=\"registerSubmitButton\"]")).click();
+        Utility.captureScreenShot(driver, "evidencias/Clic_Registro_" + Utility.getTimeStampValue() + ".png");
     }
 
     @Then("debería ver un mensaje de éxito indicando el mensaje esperado")
-    public void debería_ver_un_mensaje_de_éxito_indicando_el_mensaje_esperado() {
-        String mensajeEsperado = registerData.get("mensajeExito").asText();
-
-        // Espera hasta que el mensaje de éxito sea visible
+    public void debería_ver_un_mensaje_de_éxito_indicando_el_mensaje_esperado() throws IOException {
         String mensajeObtenido = wait
                 .until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/div[1]/div/div/div[2]")))
                 .getText();
 
-        // Verifica si el mensaje obtenido coincide con el mensaje esperado
+        String mensajeEsperado = registerData.get("mensajeExito").asText();
+
         assert mensajeObtenido.trim().equals(mensajeEsperado) :
                 String.format("El mensaje no coincide con lo esperado. Esperado: '%s', pero obtenido: '%s'",
                         mensajeEsperado, mensajeObtenido);
 
-        // Espera un poco más antes de cerrar
-        try {
-            Thread.sleep(2000); // Espera 2 segundos
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        Utility.captureScreenShot(driver, "evidencias/Mensaje_Exito_Registro_" + Utility.getTimeStampValue() + ".png");
     }
 }
